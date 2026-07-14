@@ -95,6 +95,15 @@ func (s *OpenAIGatewayService) forwardAsRawChatCompletions(
 		upstreamBody = normalizedBody
 	}
 
+	if bodyWithOverrides, _, overrideErr := applyOpenAIRequestOverridesToChatCompletionsBody(
+		upstreamBody,
+		groupOpenAIRequestOverrides(apiKeyGroup(getAPIKeyFromContext(c))),
+	); overrideErr != nil {
+		return nil, overrideErr
+	} else {
+		upstreamBody = bodyWithOverrides
+	}
+
 	// 4. Apply OpenAI fast policy on the CC body
 	updatedBody, policyErr := s.applyOpenAIFastPolicyToBody(ctx, account, upstreamModel, upstreamBody)
 	if policyErr != nil {
@@ -133,6 +142,8 @@ func (s *OpenAIGatewayService) forwardAsRawChatCompletions(
 		}
 	}
 
+	reasoningEffort = extractOpenAIReasoningEffortFromBody(upstreamBody, originalModel)
+	serviceTier = extractOpenAIServiceTierFromBody(upstreamBody)
 	if clientStream {
 		var usageErr error
 		upstreamBody, usageErr = ensureOpenAIChatStreamUsage(upstreamBody)

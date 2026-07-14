@@ -232,6 +232,16 @@ func (s *OpenAIGatewayService) ForwardAsChatCompletions(
 		}
 	}
 
+	if bodyWithOverrides, _, overrideErr := applyOpenAIRequestOverridesToBody(
+		responsesBody,
+		groupOpenAIRequestOverrides(apiKeyGroup(getAPIKeyFromContext(c))),
+		upstreamModel,
+	); overrideErr != nil {
+		return nil, overrideErr
+	} else {
+		responsesBody = bodyWithOverrides
+	}
+
 	// 4b. Apply OpenAI fast policy (may filter service_tier or block the request).
 	updatedBody, policyErr := s.applyOpenAIFastPolicyToBody(ctx, account, upstreamModel, responsesBody)
 	if policyErr != nil {
@@ -313,13 +323,13 @@ func (s *OpenAIGatewayService) ForwardAsChatCompletions(
 
 	// Propagate ServiceTier and ReasoningEffort to result for billing
 	if handleErr == nil && result != nil {
-		if responsesReq.ServiceTier != "" {
-			st := responsesReq.ServiceTier
-			result.ServiceTier = &st
+		if serviceTier := extractOpenAIServiceTierFromBody(responsesBody); serviceTier != nil {
+			result.ServiceTier = serviceTier
 		}
-		if responsesReq.Reasoning != nil && responsesReq.Reasoning.Effort != "" {
-			re := responsesReq.Reasoning.Effort
-			result.ReasoningEffort = &re
+		if effort := strings.TrimSpace(gjson.GetBytes(responsesBody, "reasoning.effort").String()); effort != "" {
+			if normalized := normalizeOpenAIReasoningEffortForModel(effort, upstreamModel); normalized != "" {
+				result.ReasoningEffort = &normalized
+			}
 		}
 	}
 

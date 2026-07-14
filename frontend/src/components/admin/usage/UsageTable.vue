@@ -78,6 +78,15 @@
           </span>
         </template>
 
+        <template #cell-service_tier="{ row }">
+          <span
+            class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium"
+            :class="getServiceTierBadgeClass(row.service_tier)"
+          >
+            {{ getUsageServiceTierLabel(row.service_tier, t) }}
+          </span>
+        </template>
+
         <template #cell-endpoint="{ row }">
           <div class="max-w-[320px] space-y-1 text-xs">
             <div class="break-all text-gray-700 dark:text-gray-300">
@@ -444,7 +453,7 @@ import { useI18n } from 'vue-i18n'
 import { formatDateTime, formatReasoningEffort } from '@/utils/format'
 import { formatCacheTokens, formatMultiplier } from '@/utils/formatters'
 import { formatTokenPricePerMillion } from '@/utils/usagePricing'
-import { getUsageServiceTierLabel } from '@/utils/usageServiceTier'
+import { formatUsageServiceTier, getUsageServiceTierLabel } from '@/utils/usageServiceTier'
 import { resolveUsageRequestType } from '@/utils/usageRequestType'
 import {
   LATENCY_BAR_CLASSES,
@@ -573,7 +582,13 @@ const getRequestTypeBadgeClass = (row: AdminUsageLog): string => {
   return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
 }
 
-
+const getServiceTierBadgeClass = (serviceTier: string | null | undefined): string => {
+  const tier = formatUsageServiceTier(serviceTier)
+  if (tier === 'priority') return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200'
+  if (tier === 'flex') return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+  if (tier === 'standard') return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+  return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'
+}
 
 const formatUserAgent = (ua: string): string => {
   return ua

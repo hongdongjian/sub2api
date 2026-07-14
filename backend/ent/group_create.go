@@ -663,6 +663,20 @@ func (_c *GroupCreate) SetNillableModelsListConfig(v *domain.GroupModelsListConf
 	return _c
 }
 
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (_c *GroupCreate) SetOpenaiRequestOverrides(v domain.OpenAIRequestOverrides) *GroupCreate {
+	_c.mutation.SetOpenaiRequestOverrides(v)
+	return _c
+}
+
+// SetNillableOpenaiRequestOverrides sets the "openai_request_overrides" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableOpenaiRequestOverrides(v *domain.OpenAIRequestOverrides) *GroupCreate {
+	if v != nil {
+		_c.SetOpenaiRequestOverrides(*v)
+	}
+	return _c
+}
+
 // SetRpmLimit sets the "rpm_limit" field.
 func (_c *GroupCreate) SetRpmLimit(v int) *GroupCreate {
 	_c.mutation.SetRpmLimit(v)
@@ -934,6 +948,10 @@ func (_c *GroupCreate) defaults() error {
 		v := group.DefaultModelsListConfig
 		_c.mutation.SetModelsListConfig(v)
 	}
+	if _, ok := _c.mutation.OpenaiRequestOverrides(); !ok {
+		v := group.DefaultOpenaiRequestOverrides
+		_c.mutation.SetOpenaiRequestOverrides(v)
+	}
 	if _, ok := _c.mutation.RpmLimit(); !ok {
 		v := group.DefaultRpmLimit
 		_c.mutation.SetRpmLimit(v)
@@ -1073,6 +1091,9 @@ func (_c *GroupCreate) check() error {
 	}
 	if _, ok := _c.mutation.ModelsListConfig(); !ok {
 		return &ValidationError{Name: "models_list_config", err: errors.New(`ent: missing required field "Group.models_list_config"`)}
+	}
+	if _, ok := _c.mutation.OpenaiRequestOverrides(); !ok {
+		return &ValidationError{Name: "openai_request_overrides", err: errors.New(`ent: missing required field "Group.openai_request_overrides"`)}
 	}
 	if _, ok := _c.mutation.RpmLimit(); !ok {
 		return &ValidationError{Name: "rpm_limit", err: errors.New(`ent: missing required field "Group.rpm_limit"`)}
@@ -1291,6 +1312,10 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ModelsListConfig(); ok {
 		_spec.SetField(group.FieldModelsListConfig, field.TypeJSON, value)
 		_node.ModelsListConfig = value
+	}
+	if value, ok := _c.mutation.OpenaiRequestOverrides(); ok {
+		_spec.SetField(group.FieldOpenaiRequestOverrides, field.TypeJSON, value)
+		_node.OpenaiRequestOverrides = value
 	}
 	if value, ok := _c.mutation.RpmLimit(); ok {
 		_spec.SetField(group.FieldRpmLimit, field.TypeInt, value)
@@ -2211,6 +2236,18 @@ func (u *GroupUpsert) SetModelsListConfig(v domain.GroupModelsListConfig) *Group
 // UpdateModelsListConfig sets the "models_list_config" field to the value that was provided on create.
 func (u *GroupUpsert) UpdateModelsListConfig() *GroupUpsert {
 	u.SetExcluded(group.FieldModelsListConfig)
+	return u
+}
+
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (u *GroupUpsert) SetOpenaiRequestOverrides(v domain.OpenAIRequestOverrides) *GroupUpsert {
+	u.Set(group.FieldOpenaiRequestOverrides, v)
+	return u
+}
+
+// UpdateOpenaiRequestOverrides sets the "openai_request_overrides" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateOpenaiRequestOverrides() *GroupUpsert {
+	u.SetExcluded(group.FieldOpenaiRequestOverrides)
 	return u
 }
 
@@ -3163,6 +3200,20 @@ func (u *GroupUpsertOne) SetModelsListConfig(v domain.GroupModelsListConfig) *Gr
 func (u *GroupUpsertOne) UpdateModelsListConfig() *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateModelsListConfig()
+	})
+}
+
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (u *GroupUpsertOne) SetOpenaiRequestOverrides(v domain.OpenAIRequestOverrides) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetOpenaiRequestOverrides(v)
+	})
+}
+
+// UpdateOpenaiRequestOverrides sets the "openai_request_overrides" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateOpenaiRequestOverrides() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateOpenaiRequestOverrides()
 	})
 }
 
@@ -4284,6 +4335,20 @@ func (u *GroupUpsertBulk) SetModelsListConfig(v domain.GroupModelsListConfig) *G
 func (u *GroupUpsertBulk) UpdateModelsListConfig() *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateModelsListConfig()
+	})
+}
+
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (u *GroupUpsertBulk) SetOpenaiRequestOverrides(v domain.OpenAIRequestOverrides) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetOpenaiRequestOverrides(v)
+	})
+}
+
+// UpdateOpenaiRequestOverrides sets the "openai_request_overrides" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateOpenaiRequestOverrides() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateOpenaiRequestOverrides()
 	})
 }
 

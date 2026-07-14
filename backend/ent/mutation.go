@@ -20862,6 +20862,7 @@ type GroupMutation struct {
 	default_mapped_model                    *string
 	messages_dispatch_model_config          *domain.OpenAIMessagesDispatchModelConfig
 	models_list_config                      *domain.GroupModelsListConfig
+	openai_request_overrides                *domain.OpenAIRequestOverrides
 	rpm_limit                               *int
 	addrpm_limit                            *int
 	clearedFields                           map[string]struct{}
@@ -23300,6 +23301,42 @@ func (m *GroupMutation) ResetModelsListConfig() {
 	m.models_list_config = nil
 }
 
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (m *GroupMutation) SetOpenaiRequestOverrides(daro domain.OpenAIRequestOverrides) {
+	m.openai_request_overrides = &daro
+}
+
+// OpenaiRequestOverrides returns the value of the "openai_request_overrides" field in the mutation.
+func (m *GroupMutation) OpenaiRequestOverrides() (r domain.OpenAIRequestOverrides, exists bool) {
+	v := m.openai_request_overrides
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOpenaiRequestOverrides returns the old "openai_request_overrides" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldOpenaiRequestOverrides(ctx context.Context) (v domain.OpenAIRequestOverrides, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOpenaiRequestOverrides is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOpenaiRequestOverrides requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOpenaiRequestOverrides: %w", err)
+	}
+	return oldValue.OpenaiRequestOverrides, nil
+}
+
+// ResetOpenaiRequestOverrides resets all changes to the "openai_request_overrides" field.
+func (m *GroupMutation) ResetOpenaiRequestOverrides() {
+	m.openai_request_overrides = nil
+}
+
 // SetRpmLimit sets the "rpm_limit" field.
 func (m *GroupMutation) SetRpmLimit(i int) {
 	m.rpm_limit = &i
@@ -23714,7 +23751,7 @@ func (m *GroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupMutation) Fields() []string {
-	fields := make([]string, 0, 48)
+	fields := make([]string, 0, 49)
 	if m.created_at != nil {
 		fields = append(fields, group.FieldCreatedAt)
 	}
@@ -23856,6 +23893,9 @@ func (m *GroupMutation) Fields() []string {
 	if m.models_list_config != nil {
 		fields = append(fields, group.FieldModelsListConfig)
 	}
+	if m.openai_request_overrides != nil {
+		fields = append(fields, group.FieldOpenaiRequestOverrides)
+	}
 	if m.rpm_limit != nil {
 		fields = append(fields, group.FieldRpmLimit)
 	}
@@ -23961,6 +24001,8 @@ func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 		return m.MessagesDispatchModelConfig()
 	case group.FieldModelsListConfig:
 		return m.ModelsListConfig()
+	case group.FieldOpenaiRequestOverrides:
+		return m.OpenaiRequestOverrides()
 	case group.FieldRpmLimit:
 		return m.RpmLimit()
 	}
@@ -24066,6 +24108,8 @@ func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldMessagesDispatchModelConfig(ctx)
 	case group.FieldModelsListConfig:
 		return m.OldModelsListConfig(ctx)
+	case group.FieldOpenaiRequestOverrides:
+		return m.OldOpenaiRequestOverrides(ctx)
 	case group.FieldRpmLimit:
 		return m.OldRpmLimit(ctx)
 	}
@@ -24405,6 +24449,13 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetModelsListConfig(v)
+		return nil
+	case group.FieldOpenaiRequestOverrides:
+		v, ok := value.(domain.OpenAIRequestOverrides)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOpenaiRequestOverrides(v)
 		return nil
 	case group.FieldRpmLimit:
 		v, ok := value.(int)
@@ -24950,6 +25001,9 @@ func (m *GroupMutation) ResetField(name string) error {
 		return nil
 	case group.FieldModelsListConfig:
 		m.ResetModelsListConfig()
+		return nil
+	case group.FieldOpenaiRequestOverrides:
+		m.ResetOpenaiRequestOverrides()
 		return nil
 	case group.FieldRpmLimit:
 		m.ResetRpmLimit()

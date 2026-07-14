@@ -181,7 +181,7 @@ func TestOpenAIGatewayServiceForwardPreservesMappedGPT56MaxEffort(t *testing.T) 
 	require.Equal(t, "max", *result.ReasoningEffort)
 }
 
-func TestOpenAIGatewayServiceForwardOAuthCompactDowngradesMaxEffort(t *testing.T) {
+func TestOpenAIGatewayServiceForwardOAuthCompactDowngradesMaxOverride(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	upstream := &httpUpstreamRecorder{
 		resp: &http.Response{
@@ -210,8 +210,14 @@ func TestOpenAIGatewayServiceForwardOAuthCompactDowngradesMaxEffort(t *testing.T
 	c, _ := gin.CreateTestContext(rec)
 	c.Request = httptest.NewRequest(http.MethodPost, "/openai/v1/responses/compact", nil)
 	SetOpenAIClientTransport(c, OpenAIClientTransportHTTP)
+	c.Set("api_key", &APIKey{Group: &Group{
+		Platform: PlatformOpenAI,
+		OpenAIRequestOverrides: OpenAIRequestOverrides{
+			ReasoningEffort: "max",
+		},
+	}})
 
-	body := []byte(`{"model":"gpt-5.6-sol","instructions":"compact-test","input":"hello","reasoning":{"effort":"max"}}`)
+	body := []byte(`{"model":"gpt-5.6-sol","instructions":"compact-test","input":"hello","reasoning":{"effort":"xhigh"}}`)
 	result, err := svc.Forward(context.Background(), c, account, body)
 
 	require.NoError(t, err)

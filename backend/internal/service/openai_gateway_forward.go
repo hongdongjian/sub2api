@@ -169,6 +169,7 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 	}
 
 	apiKey := getAPIKeyFromContext(c)
+	openAIRequestOverrides := groupOpenAIRequestOverrides(apiKeyGroup(apiKey))
 	imageGenerationAllowed := GroupAllowsImageGeneration(nil)
 	if apiKey != nil {
 		imageGenerationAllowed = GroupAllowsImageGeneration(apiKey.Group)
@@ -390,7 +391,24 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 		}
 	}
 
-	if rawTier := requestView.ServiceTier; rawTier != "" {
+	if !openAIRequestOverridesIsZero(openAIRequestOverrides) {
+		decoded, decodeErr := ensureReqBody()
+		if decodeErr != nil {
+			return nil, decodeErr
+		}
+		if applyOpenAIRequestOverridesToMap(decoded, openAIRequestOverrides, upstreamModel) {
+			markDecodedModified()
+		}
+	}
+
+	rawServiceTier := requestView.ServiceTier
+	if reqBody != nil {
+		rawServiceTier = ""
+		if raw, ok := reqBody["service_tier"].(string); ok {
+			rawServiceTier = strings.TrimSpace(raw)
+		}
+	}
+	if rawTier := rawServiceTier; rawTier != "" {
 		if normTier := normalizedOpenAIServiceTierValue(rawTier); normTier != "" {
 			action, errMsg := s.evaluateOpenAIFastPolicy(ctx, account, upstreamModel, normTier)
 			switch action {
@@ -436,6 +454,17 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 				return nil, fmt.Errorf("serialize request body: %w", marshalErr)
 			}
 			requestView = newOpenAIRequestView(body)
+		}
+	}
+	if account.IsOpenAIOAuth() && isCompactRequest {
+		normalizedBody, normalized, normalizeErr := normalizeOpenAICodexCompactReasoningEffort(body, upstreamModel)
+		if normalizeErr != nil {
+			return nil, normalizeErr
+		}
+		if normalized {
+			body = normalizedBody
+			requestView = newOpenAIRequestView(body)
+			reqBody = nil
 		}
 	}
 	imageBillingModel := ""

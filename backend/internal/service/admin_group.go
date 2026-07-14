@@ -301,9 +301,10 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 		DefaultMappedModel:              input.DefaultMappedModel,
 		MessagesDispatchModelConfig:     normalizeOpenAIMessagesDispatchModelConfig(input.MessagesDispatchModelConfig),
 		ModelsListConfig:                normalizeGroupModelsListConfig(input.ModelsListConfig),
+		OpenAIRequestOverrides:          normalizeOpenAIRequestOverrides(input.OpenAIRequestOverrides),
 		RPMLimit:                        input.RPMLimit,
 	}
-	sanitizeGroupMessagesDispatchFields(group)
+	sanitizeGroupOpenAIFields(group)
 	if err := s.groupRepo.Create(ctx, group); err != nil {
 		return nil, err
 	}
@@ -615,10 +616,13 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 	if input.ModelsListConfig != nil {
 		group.ModelsListConfig = normalizeGroupModelsListConfig(*input.ModelsListConfig)
 	}
+	if input.OpenAIRequestOverrides != nil {
+		group.OpenAIRequestOverrides = normalizeOpenAIRequestOverrides(*input.OpenAIRequestOverrides)
+	}
 	if input.RPMLimit != nil {
 		group.RPMLimit = *input.RPMLimit
 	}
-	sanitizeGroupMessagesDispatchFields(group)
+	sanitizeGroupOpenAIFields(group)
 
 	if err := s.groupRepo.Update(ctx, group); err != nil {
 		return nil, err

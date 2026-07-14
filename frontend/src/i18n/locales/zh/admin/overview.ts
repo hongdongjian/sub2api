@@ -991,6 +991,14 @@ export default {
         targetModelPlaceholder: '例如: gpt-5.4',
         removeExactMapping: '删除精确映射'
       },
+      openaiRequestOverrides: {
+        title: 'OpenAI 请求参数覆盖',
+        hint: '未配置的字段不会覆盖客户端请求；已配置字段会在转发前强制写入请求体。',
+        serviceTier: '服务档位',
+        reasoningEffort: '推理强度',
+        textVerbosity: '文本详细度',
+        notConfigured: '不覆盖'
+      },
       invalidRequestFallback: {
         title: '无效请求兜底分组',
         hint: '仅当上游明确返回 prompt too long 时才会触发，留空表示不兜底',

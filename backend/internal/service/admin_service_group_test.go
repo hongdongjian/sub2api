@@ -796,6 +796,52 @@ func TestAdminService_UpdateGroup_ClearsMessagesDispatchFieldsWhenPlatformChange
 	require.Equal(t, OpenAIMessagesDispatchModelConfig{}, repo.updated.MessagesDispatchModelConfig)
 }
 
+func TestAdminService_CreateGroup_NormalizesOpenAIRequestOverrides(t *testing.T) {
+	repo := &groupRepoStubForAdmin{}
+	svc := &adminServiceImpl{groupRepo: repo}
+
+	group, err := svc.CreateGroup(context.Background(), &CreateGroupInput{
+		Name:           "openai-overrides",
+		Description:    "request overrides",
+		Platform:       PlatformOpenAI,
+		RateMultiplier: 1.0,
+		OpenAIRequestOverrides: OpenAIRequestOverrides{
+			ServiceTier:     " fast ",
+			ReasoningEffort: " MAX ",
+			TextVerbosity:   " HIGH ",
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, group)
+	require.NotNil(t, repo.created)
+	require.Equal(t, OpenAIRequestOverrides{
+		ServiceTier:     "priority",
+		ReasoningEffort: "max",
+		TextVerbosity:   "high",
+	}, repo.created.OpenAIRequestOverrides)
+}
+
+func TestAdminService_CreateGroup_ClearsOpenAIRequestOverridesForNonOpenAIPlatform(t *testing.T) {
+	repo := &groupRepoStubForAdmin{}
+	svc := &adminServiceImpl{groupRepo: repo}
+
+	group, err := svc.CreateGroup(context.Background(), &CreateGroupInput{
+		Name:           "anthropic-overrides",
+		Description:    "request overrides",
+		Platform:       PlatformAnthropic,
+		RateMultiplier: 1.0,
+		OpenAIRequestOverrides: OpenAIRequestOverrides{
+			ServiceTier:     "priority",
+			ReasoningEffort: "xhigh",
+			TextVerbosity:   "high",
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, group)
+	require.NotNil(t, repo.created)
+	require.Equal(t, OpenAIRequestOverrides{}, repo.created.OpenAIRequestOverrides)
+}
+
 func TestAdminService_ListGroups_WithSearch(t *testing.T) {
 	// 测试：
 	// 1. search 参数正常传递到 repository 层

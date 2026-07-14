@@ -109,3 +109,18 @@ func sanitizeGroupMessagesDispatchFields(g *Group) {
 	g.DefaultMappedModel = ""
 	g.MessagesDispatchModelConfig = OpenAIMessagesDispatchModelConfig{}
 }
+
+func sanitizeGroupOpenAIFields(g *Group) {
+	if g == nil {
+		return
+	}
+	g.MessagesDispatchModelConfig = normalizeOpenAIMessagesDispatchModelConfig(g.MessagesDispatchModelConfig)
+	g.OpenAIRequestOverrides = normalizeOpenAIRequestOverrides(g.OpenAIRequestOverrides)
+	if g.Platform == PlatformOpenAI {
+		return
+	}
+	g.AllowMessagesDispatch = false
+	g.DefaultMappedModel = ""
+	g.MessagesDispatchModelConfig = OpenAIMessagesDispatchModelConfig{}
+	g.OpenAIRequestOverrides = OpenAIRequestOverrides{}
+}

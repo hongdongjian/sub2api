@@ -1391,6 +1391,44 @@
             {{ t("admin.groups.openaiMessages.allowDispatchHint") }}
           </p>
 
+          <div class="mt-5 border-t border-gray-100 pt-4 dark:border-dark-700">
+            <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ t("admin.groups.openaiRequestOverrides.title") }}
+            </h5>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ t("admin.groups.openaiRequestOverrides.hint") }}
+            </p>
+            <div class="mt-3 grid gap-4 md:grid-cols-3">
+              <div>
+                <label class="input-label">{{
+                  t("admin.groups.openaiRequestOverrides.serviceTier")
+                }}</label>
+                <Select
+                  v-model="createForm.openai_service_tier_override"
+                  :options="openAIServiceTierOverrideOptions"
+                />
+              </div>
+              <div>
+                <label class="input-label">{{
+                  t("admin.groups.openaiRequestOverrides.reasoningEffort")
+                }}</label>
+                <Select
+                  v-model="createForm.openai_reasoning_effort_override"
+                  :options="openAIReasoningEffortOverrideOptions"
+                />
+              </div>
+              <div>
+                <label class="input-label">{{
+                  t("admin.groups.openaiRequestOverrides.textVerbosity")
+                }}</label>
+                <Select
+                  v-model="createForm.openai_text_verbosity_override"
+                  :options="openAITextVerbosityOverrideOptions"
+                />
+              </div>
+            </div>
+          </div>
+
           <div v-if="createForm.allow_messages_dispatch" class="mt-3">
             <div
               class="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-dark-600 dark:bg-dark-800"
@@ -2901,6 +2939,44 @@
             {{ t("admin.groups.openaiMessages.allowDispatchHint") }}
           </p>
 
+          <div class="mt-5 border-t border-gray-100 pt-4 dark:border-dark-700">
+            <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ t("admin.groups.openaiRequestOverrides.title") }}
+            </h5>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ t("admin.groups.openaiRequestOverrides.hint") }}
+            </p>
+            <div class="mt-3 grid gap-4 md:grid-cols-3">
+              <div>
+                <label class="input-label">{{
+                  t("admin.groups.openaiRequestOverrides.serviceTier")
+                }}</label>
+                <Select
+                  v-model="editForm.openai_service_tier_override"
+                  :options="openAIServiceTierOverrideOptions"
+                />
+              </div>
+              <div>
+                <label class="input-label">{{
+                  t("admin.groups.openaiRequestOverrides.reasoningEffort")
+                }}</label>
+                <Select
+                  v-model="editForm.openai_reasoning_effort_override"
+                  :options="openAIReasoningEffortOverrideOptions"
+                />
+              </div>
+              <div>
+                <label class="input-label">{{
+                  t("admin.groups.openaiRequestOverrides.textVerbosity")
+                }}</label>
+                <Select
+                  v-model="editForm.openai_text_verbosity_override"
+                  :options="openAITextVerbosityOverrideOptions"
+                />
+              </div>
+            </div>
+          </div>
+
           <div v-if="editForm.allow_messages_dispatch" class="mt-3">
             <div
               class="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-dark-600 dark:bg-dark-800"
@@ -3764,6 +3840,62 @@ const subscriptionTypeOptions = computed(() => [
   { value: "subscription", label: t("admin.groups.subscription.subscription") },
 ]);
 
+const openAIServiceTierOverrideOptions = computed(() => [
+  { value: "", label: t("admin.groups.openaiRequestOverrides.notConfigured") },
+  { value: "priority", label: "priority" },
+  { value: "flex", label: "flex" },
+  { value: "auto", label: "auto" },
+  { value: "default", label: "default" },
+  { value: "scale", label: "scale" },
+]);
+
+const openAIReasoningEffortOverrideOptions = computed(() => [
+  { value: "", label: t("admin.groups.openaiRequestOverrides.notConfigured") },
+  { value: "low", label: "low" },
+  { value: "medium", label: "medium" },
+  { value: "high", label: "high" },
+  { value: "xhigh", label: "xhigh" },
+  { value: "max", label: "max" },
+]);
+
+const openAITextVerbosityOverrideOptions = computed(() => [
+  { value: "", label: t("admin.groups.openaiRequestOverrides.notConfigured") },
+  { value: "low", label: "low" },
+  { value: "medium", label: "medium" },
+  { value: "high", label: "high" },
+]);
+
+const openAIOverridesFormStateToConfig = (form: {
+  openai_service_tier_override: string;
+  openai_reasoning_effort_override: string;
+  openai_text_verbosity_override: string;
+}) => ({
+  service_tier: form.openai_service_tier_override || undefined,
+  reasoning_effort: form.openai_reasoning_effort_override || undefined,
+  text_verbosity: form.openai_text_verbosity_override || undefined,
+});
+
+const applyOpenAIOverridesConfigToFormState = (
+  form: {
+    openai_service_tier_override: string;
+    openai_reasoning_effort_override: string;
+    openai_text_verbosity_override: string;
+  },
+  config?: AdminGroup["openai_request_overrides"],
+) => {
+  form.openai_service_tier_override = config?.service_tier || "";
+  form.openai_reasoning_effort_override = config?.reasoning_effort || "";
+  form.openai_text_verbosity_override = config?.text_verbosity || "";
+};
+
+const resetOpenAIOverridesFormState = (form: {
+  openai_service_tier_override: string;
+  openai_reasoning_effort_override: string;
+  openai_text_verbosity_override: string;
+}) => {
+  applyOpenAIOverridesConfigToFormState(form);
+};
+
 // 降级分组选项（创建时）- 仅包含 anthropic 平台且未启用 claude_code_only 的分组
 const fallbackGroupOptions = computed(() => {
   const options: { value: number | null; label: string }[] = [
@@ -3975,6 +4107,9 @@ const createForm = reactive({
   sonnet_mapped_model: createMessagesDispatchDefaults.sonnet_mapped_model,
   haiku_mapped_model: createMessagesDispatchDefaults.haiku_mapped_model,
   exact_model_mappings: [] as MessagesDispatchMappingRow[],
+  openai_service_tier_override: "",
+  openai_reasoning_effort_override: "",
+  openai_text_verbosity_override: "",
   // 账号过滤控制（OpenAI/Antigravity 平台）
   require_oauth_only: false,
   require_privacy_set: false,
@@ -4323,6 +4458,9 @@ const editForm = reactive({
   sonnet_mapped_model: editMessagesDispatchDefaults.sonnet_mapped_model,
   haiku_mapped_model: editMessagesDispatchDefaults.haiku_mapped_model,
   exact_model_mappings: [] as MessagesDispatchMappingRow[],
+  openai_service_tier_override: "",
+  openai_reasoning_effort_override: "",
+  openai_text_verbosity_override: "",
   // 账号过滤控制（OpenAI/Antigravity 平台）
   require_oauth_only: false,
   require_privacy_set: false,
@@ -4795,6 +4933,10 @@ const handleCreateGroup = async () => {
               exact_model_mappings: createForm.exact_model_mappings,
             })
           : undefined,
+      openai_request_overrides:
+        createForm.platform === "openai"
+          ? openAIOverridesFormStateToConfig(createForm)
+          : undefined,
     };
     // v-model.number 清空输入框时产生 ""，转为 null 让后端设为无限制
     const emptyToNull = (v: any) => (v === "" ? null : v);
@@ -4898,6 +5040,10 @@ const handleEdit = async (group: AdminGroup) => {
   editForm.haiku_mapped_model = messagesDispatchFormState.haiku_mapped_model;
   editForm.exact_model_mappings =
     messagesDispatchFormState.exact_model_mappings;
+  applyOpenAIOverridesConfigToFormState(
+    editForm,
+    group.openai_request_overrides,
+  );
   editForm.require_oauth_only = group.require_oauth_only ?? false;
   editForm.require_privacy_set = group.require_privacy_set ?? false;
   editForm.model_routing_enabled = group.model_routing_enabled || false;
@@ -4939,6 +5085,7 @@ const closeEditModal = () => {
   editForm.web_search_price_per_call = null;
   resetMessagesDispatchFormState(editForm);
   resetModelsListState(editModelsListState);
+  resetOpenAIOverridesFormState(editForm);
 };
 
 const handleUpdateGroup = async () => {
@@ -4985,6 +5132,10 @@ const handleUpdateGroup = async () => {
               haiku_mapped_model: editForm.haiku_mapped_model,
               exact_model_mappings: editForm.exact_model_mappings,
             })
+          : undefined,
+      openai_request_overrides:
+        editForm.platform === "openai"
+          ? openAIOverridesFormStateToConfig(editForm)
           : undefined,
     };
     // v-model.number 清空输入框时产生 ""，转为 null 让后端设为无限制
@@ -5131,6 +5282,7 @@ watch(
     }
     if (newVal !== "openai") {
       resetMessagesDispatchFormState(createForm);
+      resetOpenAIOverridesFormState(createForm);
     }
     if (!["openai", "antigravity", "anthropic", "gemini"].includes(newVal)) {
       createForm.require_oauth_only = false;
@@ -5164,6 +5316,7 @@ watch(
     }
     if (newVal !== "openai") {
       resetMessagesDispatchFormState(editForm);
+      resetOpenAIOverridesFormState(editForm);
     }
     if (!["openai", "antigravity", "anthropic", "gemini"].includes(newVal)) {
       editForm.require_oauth_only = false;
@@ -5200,6 +5353,7 @@ watch(
     if (newVal !== 'openai') {
       editForm.allow_messages_dispatch = false
       editForm.default_mapped_model = ''
+      resetOpenAIOverridesFormState(editForm)
     }
   }
 )

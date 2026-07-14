@@ -275,7 +275,12 @@ func (s *OpenAIGatewayService) proxyResponsesWebSocketV2Passthrough(
 		initialRequestModel = hooks.InitialRequestModel
 	}
 	usageMeta := newOpenAIWSPassthroughUsageMeta(initialRequestModel, firstClientMessage)
-	updatedFirst, blocked, policyErr := s.applyOpenAIFastPolicyToWSResponseCreate(ctx, account, capturedSessionModel, firstClientMessage)
+	openAIRequestOverrides := groupOpenAIRequestOverrides(apiKeyGroup(getAPIKeyFromContext(c)))
+	overriddenFirst, _, overrideErr := applyOpenAIRequestOverridesToWSResponseCreate(firstClientMessage, openAIRequestOverrides, capturedSessionModel)
+	if overrideErr != nil {
+		return fmt.Errorf("apply openai request overrides on first ws frame: %w", overrideErr)
+	}
+	updatedFirst, blocked, policyErr := s.applyOpenAIFastPolicyToWSResponseCreate(ctx, account, capturedSessionModel, overriddenFirst)
 	if policyErr != nil {
 		return fmt.Errorf("apply openai fast policy on first ws frame: %w", policyErr)
 	}
@@ -438,7 +443,11 @@ func (s *OpenAIGatewayService) proxyResponsesWebSocketV2Passthrough(
 			if model == "" {
 				model = capturedSessionModel
 			}
-			out, blocked, policyErr := s.applyOpenAIFastPolicyToWSResponseCreate(ctx, account, model, payload)
+			policyInput, _, overrideErr := applyOpenAIRequestOverridesToWSResponseCreate(payload, openAIRequestOverrides, model)
+			if overrideErr != nil {
+				return payload, nil, overrideErr
+			}
+			out, blocked, policyErr := s.applyOpenAIFastPolicyToWSResponseCreate(ctx, account, model, policyInput)
 			// 多轮 passthrough usage：仅在成功（non-block / non-err）
 			// 的 response.create 帧上更新 usageMeta，使用
 			// filter 处理后的 payload，与首帧 policy-after-extract 语义

@@ -110,6 +110,8 @@ const (
 	FieldMessagesDispatchModelConfig = "messages_dispatch_model_config"
 	// FieldModelsListConfig holds the string denoting the models_list_config field in the database.
 	FieldModelsListConfig = "models_list_config"
+	// FieldOpenaiRequestOverrides holds the string denoting the openai_request_overrides field in the database.
+	FieldOpenaiRequestOverrides = "openai_request_overrides"
 	// FieldRpmLimit holds the string denoting the rpm_limit field in the database.
 	FieldRpmLimit = "rpm_limit"
 	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
@@ -234,6 +236,7 @@ var Columns = []string{
 	FieldDefaultMappedModel,
 	FieldMessagesDispatchModelConfig,
 	FieldModelsListConfig,
+	FieldOpenaiRequestOverrides,
 	FieldRpmLimit,
 }
 
@@ -342,6 +345,8 @@ var (
 	DefaultMessagesDispatchModelConfig domain.OpenAIMessagesDispatchModelConfig
 	// DefaultModelsListConfig holds the default value on creation for the "models_list_config" field.
 	DefaultModelsListConfig domain.GroupModelsListConfig
+	// DefaultOpenaiRequestOverrides holds the default value on creation for the "openai_request_overrides" field.
+	DefaultOpenaiRequestOverrides domain.OpenAIRequestOverrides
 	// DefaultRpmLimit holds the default value on creation for the "rpm_limit" field.
 	DefaultRpmLimit int
 )

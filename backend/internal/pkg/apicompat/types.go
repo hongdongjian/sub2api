@@ -34,7 +34,7 @@ type AnthropicRequest struct {
 
 // AnthropicOutputConfig controls output generation parameters.
 type AnthropicOutputConfig struct {
-	Effort string `json:"effort,omitempty"` // "low" | "medium" | "high" | "max"
+	Effort string `json:"effort,omitempty"` // "low" | "medium" | "high" | "xhigh" | "max"
 }
 
 // AnthropicThinking configures extended thinking in the Anthropic API.
@@ -210,7 +210,7 @@ type ResponsesRequest struct {
 
 // ResponsesReasoning configures reasoning effort in the Responses API.
 type ResponsesReasoning struct {
-	Effort  string `json:"effort"`            // "low" | "medium" | "high" | "xhigh"
+	Effort  string `json:"effort"`            // "low" | "medium" | "high" | "xhigh" | "max"
 	Summary string `json:"summary,omitempty"` // "auto" | "concise" | "detailed"
 }
 
@@ -578,7 +578,7 @@ type ChatCompletionsRequest struct {
 	Tools               []ChatTool         `json:"tools,omitempty"`
 	ParallelToolCalls   *bool              `json:"parallel_tool_calls,omitempty"`
 	ToolChoice          json.RawMessage    `json:"tool_choice,omitempty"`
-	ReasoningEffort     string             `json:"reasoning_effort,omitempty"` // "low" | "medium" | "high" | "xhigh"
+	ReasoningEffort     string             `json:"reasoning_effort,omitempty"` // "low" | "medium" | "high" | "xhigh" | "max"
 	ServiceTier         string             `json:"service_tier,omitempty"`
 	Stop                json.RawMessage    `json:"stop,omitempty"` // string or []string
 	ResponseFormat      json.RawMessage    `json:"response_format,omitempty"`

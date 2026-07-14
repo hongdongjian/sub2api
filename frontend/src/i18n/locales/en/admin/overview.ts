@@ -993,6 +993,14 @@ export default {
         targetModelPlaceholder: 'e.g., gpt-5.4',
         removeExactMapping: 'Remove Exact Mapping'
       },
+      openaiRequestOverrides: {
+        title: 'OpenAI Request Overrides',
+        hint: 'Fields left unconfigured do not override client requests. Configured fields are forced into the request body before forwarding.',
+        serviceTier: 'Service tier',
+        reasoningEffort: 'Reasoning effort',
+        textVerbosity: 'Text verbosity',
+        notConfigured: 'Do not override'
+      },
       invalidRequestFallback: {
         title: 'Invalid Request Fallback Group',
         hint: 'Triggered only when upstream explicitly returns prompt too long. Leave empty to disable fallback.',

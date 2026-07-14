@@ -84,12 +84,14 @@ func defaultThinkingBudget(effort string) int {
 }
 
 // mapResponsesEffortToAnthropic converts OpenAI Responses reasoning effort to
-// Anthropic effort levels. Reverse of mapAnthropicEffortToResponses.
+// Anthropic effort levels. Anthropic uses max for OpenAI's xhigh tier, while
+// an OpenAI-native max value remains max.
 //
 //	low    → low
 //	medium → medium
 //	high   → high
 //	xhigh  → max
+//	max    → max
 func mapResponsesEffortToAnthropic(effort string) string {
 	if effort == "xhigh" {
 		return "max"

@@ -86,7 +86,7 @@ func (s *APIKeyRepoSuite) TestGetByKey_NotFound() {
 	s.Require().Error(err, "expected error for non-existent key")
 }
 
-func (s *APIKeyRepoSuite) TestGetByKeyForAuth_PreservesMessagesDispatchModelConfig() {
+func (s *APIKeyRepoSuite) TestGetByKeyForAuth_PreservesOpenAIMessagesDispatchFields() {
 	user := s.mustCreateUser("getbykey-auth-dispatch@test.com")
 	group, err := s.client.Group.Create().
 		SetName("g-auth-dispatch").
@@ -103,6 +103,11 @@ func (s *APIKeyRepoSuite) TestGetByKeyForAuth_PreservesMessagesDispatchModelConf
 			ExactModelMappings: map[string]string{
 				"claude-sonnet-4.5": "gpt-5.4-nano",
 			},
+		}).
+		SetOpenaiRequestOverrides(service.OpenAIRequestOverrides{
+			ServiceTier:     "priority",
+			ReasoningEffort: "xhigh",
+			TextVerbosity:   "high",
 		}).
 		Save(s.ctx)
 	s.Require().NoError(err)
@@ -123,6 +128,11 @@ func (s *APIKeyRepoSuite) TestGetByKeyForAuth_PreservesMessagesDispatchModelConf
 	s.Require().Equal("gpt-5.4", got.Group.DefaultMappedModel)
 	s.Require().Equal("gpt-5.4-nano", got.Group.MessagesDispatchModelConfig.OpusMappedModel)
 	s.Require().Equal("gpt-5.4-nano", got.Group.MessagesDispatchModelConfig.ExactModelMappings["claude-sonnet-4.5"])
+	s.Require().Equal(service.OpenAIRequestOverrides{
+		ServiceTier:     "priority",
+		ReasoningEffort: "xhigh",
+		TextVerbosity:   "high",
+	}, got.Group.OpenAIRequestOverrides)
 }
 
 // --- Update ---

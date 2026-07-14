@@ -17,6 +17,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/pkg/xai"
 	"github.com/Wei-Shaw/sub2api/internal/util/responseheaders"
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )
 
@@ -231,6 +232,16 @@ func (s *OpenAIGatewayService) ForwardAsAnthropic(
 		}
 	}
 
+	if bodyWithOverrides, _, overrideErr := applyOpenAIRequestOverridesToBody(
+		responsesBody,
+		groupOpenAIRequestOverrides(apiKeyGroup(getAPIKeyFromContext(c))),
+		upstreamModel,
+	); overrideErr != nil {
+		return nil, overrideErr
+	} else {
+		responsesBody = bodyWithOverrides
+	}
+
 	// 4c. Apply OpenAI fast policy (may filter service_tier or block the request).
 	// Mirrors the Claude anthropic-beta "fast-mode-2026-02-01" filter, but keyed
 	// on the body-level service_tier field (priority/flex).
@@ -381,13 +392,13 @@ func (s *OpenAIGatewayService) ForwardAsAnthropic(
 		if promptCacheKey != "" && anthropicDigestChain != "" {
 			s.bindOpenAICompatAnthropicDigestPromptCacheKey(account, apiKeyID, anthropicDigestChain, promptCacheKey, anthropicMatchedDigestChain)
 		}
-		if responsesReq.ServiceTier != "" {
-			st := responsesReq.ServiceTier
-			result.ServiceTier = &st
+		if serviceTier := extractOpenAIServiceTierFromBody(responsesBody); serviceTier != nil {
+			result.ServiceTier = serviceTier
 		}
-		if responsesReq.Reasoning != nil && responsesReq.Reasoning.Effort != "" {
-			re := responsesReq.Reasoning.Effort
-			result.ReasoningEffort = &re
+		if effort := strings.TrimSpace(gjson.GetBytes(responsesBody, "reasoning.effort").String()); effort != "" {
+			if normalized := normalizeOpenAIReasoningEffortForModel(effort, upstreamModel); normalized != "" {
+				result.ReasoningEffort = &normalized
+			}
 		}
 	}
 

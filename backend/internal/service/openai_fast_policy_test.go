@@ -196,6 +196,56 @@ func TestApplyOpenAIFastPolicyToBody_DefaultPassesPriorityAndFast(t *testing.T) 
 	require.Equal(t, string(body), string(updated))
 }
 
+func TestApplyOpenAIRequestOverridesToBody_EmptyConfigNoop(t *testing.T) {
+	body := []byte(`{"model":"gpt-5.5","reasoning":{"effort":"low"},"service_tier":"flex"}`)
+
+	updated, changed, err := applyOpenAIRequestOverridesToBody(body, OpenAIRequestOverrides{}, "gpt-5.5")
+	require.NoError(t, err)
+	require.False(t, changed)
+	require.Equal(t, string(body), string(updated))
+}
+
+func TestApplyOpenAIRequestOverridesToBody_ForcesConfiguredFields(t *testing.T) {
+	body := []byte(`{"model":"gpt-5.5","reasoning":{"effort":"low"},"service_tier":"flex","text":{"verbosity":"low"}}`)
+
+	updated, changed, err := applyOpenAIRequestOverridesToBody(body, OpenAIRequestOverrides{
+		ServiceTier:     "priority",
+		ReasoningEffort: "x-high",
+		TextVerbosity:   "high",
+	}, "gpt-5.5")
+	require.NoError(t, err)
+	require.True(t, changed)
+	require.Equal(t, "priority", gjson.GetBytes(updated, "service_tier").String())
+	require.Equal(t, "xhigh", gjson.GetBytes(updated, "reasoning.effort").String())
+	require.Equal(t, "high", gjson.GetBytes(updated, "text.verbosity").String())
+}
+
+func TestApplyOpenAIRequestOverridesToBody_SkipsUnsupportedVerbosityModel(t *testing.T) {
+	body := []byte(`{"model":"gpt-5.1","input":"hi"}`)
+
+	updated, changed, err := applyOpenAIRequestOverridesToBody(body, OpenAIRequestOverrides{
+		TextVerbosity: "high",
+	}, "gpt-5.1")
+	require.NoError(t, err)
+	require.False(t, changed)
+	require.False(t, gjson.GetBytes(updated, "text.verbosity").Exists())
+}
+
+func TestApplyOpenAIRequestOverridesToChatCompletionsBody_ForcesFlatFields(t *testing.T) {
+	body := []byte(`{"model":"gpt-5.5","messages":[],"reasoning_effort":"low","service_tier":"flex"}`)
+
+	updated, changed, err := applyOpenAIRequestOverridesToChatCompletionsBody(body, OpenAIRequestOverrides{
+		ServiceTier:     "priority",
+		ReasoningEffort: "xhigh",
+		TextVerbosity:   "high",
+	})
+	require.NoError(t, err)
+	require.True(t, changed)
+	require.Equal(t, "priority", gjson.GetBytes(updated, "service_tier").String())
+	require.Equal(t, "xhigh", gjson.GetBytes(updated, "reasoning_effort").String())
+	require.False(t, gjson.GetBytes(updated, "text.verbosity").Exists(), "raw chat completions path should not invent Responses-only fields")
+}
+
 func TestApplyOpenAIFastPolicyToBody_ExplicitFilterRemovesField(t *testing.T) {
 	svc := newOpenAIGatewayServiceWithSettings(t, openAIFastFilterPriorityPolicy())
 	account := &Account{Platform: PlatformOpenAI, Type: AccountTypeAPIKey}

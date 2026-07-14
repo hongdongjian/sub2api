@@ -892,6 +892,20 @@ func (_u *GroupUpdate) SetNillableModelsListConfig(v *domain.GroupModelsListConf
 	return _u
 }
 
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (_u *GroupUpdate) SetOpenaiRequestOverrides(v domain.OpenAIRequestOverrides) *GroupUpdate {
+	_u.mutation.SetOpenaiRequestOverrides(v)
+	return _u
+}
+
+// SetNillableOpenaiRequestOverrides sets the "openai_request_overrides" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableOpenaiRequestOverrides(v *domain.OpenAIRequestOverrides) *GroupUpdate {
+	if v != nil {
+		_u.SetOpenaiRequestOverrides(*v)
+	}
+	return _u
+}
+
 // SetRpmLimit sets the "rpm_limit" field.
 func (_u *GroupUpdate) SetRpmLimit(v int) *GroupUpdate {
 	_u.mutation.ResetRpmLimit()
@@ -1475,6 +1489,9 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.ModelsListConfig(); ok {
 		_spec.SetField(group.FieldModelsListConfig, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.OpenaiRequestOverrides(); ok {
+		_spec.SetField(group.FieldOpenaiRequestOverrides, field.TypeJSON, value)
 	}
 	if value, ok := _u.mutation.RpmLimit(); ok {
 		_spec.SetField(group.FieldRpmLimit, field.TypeInt, value)
@@ -2652,6 +2669,20 @@ func (_u *GroupUpdateOne) SetNillableModelsListConfig(v *domain.GroupModelsListC
 	return _u
 }
 
+// SetOpenaiRequestOverrides sets the "openai_request_overrides" field.
+func (_u *GroupUpdateOne) SetOpenaiRequestOverrides(v domain.OpenAIRequestOverrides) *GroupUpdateOne {
+	_u.mutation.SetOpenaiRequestOverrides(v)
+	return _u
+}
+
+// SetNillableOpenaiRequestOverrides sets the "openai_request_overrides" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableOpenaiRequestOverrides(v *domain.OpenAIRequestOverrides) *GroupUpdateOne {
+	if v != nil {
+		_u.SetOpenaiRequestOverrides(*v)
+	}
+	return _u
+}
+
 // SetRpmLimit sets the "rpm_limit" field.
 func (_u *GroupUpdateOne) SetRpmLimit(v int) *GroupUpdateOne {
 	_u.mutation.ResetRpmLimit()
@@ -3265,6 +3296,9 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 	}
 	if value, ok := _u.mutation.ModelsListConfig(); ok {
 		_spec.SetField(group.FieldModelsListConfig, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.OpenaiRequestOverrides(); ok {
+		_spec.SetField(group.FieldOpenaiRequestOverrides, field.TypeJSON, value)
 	}
 	if value, ok := _u.mutation.RpmLimit(); ok {
 		_spec.SetField(group.FieldRpmLimit, field.TypeInt, value)

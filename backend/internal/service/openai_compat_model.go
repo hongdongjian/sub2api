@@ -38,15 +38,14 @@ func applyOpenAICompatModelNormalization(req *apicompat.AnthropicRequest) {
 		return
 	}
 
-	claudeEffort := openAIReasoningEffortToClaudeOutputEffort(derivedEffort)
-	if claudeEffort == "" {
+	if derivedEffort == "" {
 		return
 	}
 
 	if req.OutputConfig == nil {
 		req.OutputConfig = &apicompat.AnthropicOutputConfig{}
 	}
-	req.OutputConfig.Effort = claudeEffort
+	req.OutputConfig.Effort = derivedEffort
 }
 
 func splitOpenAICompatReasoningModel(model string) (normalizedModel string, reasoningEffort string, ok bool) {
@@ -89,15 +88,4 @@ func splitOpenAICompatReasoningModel(model string) (normalizedModel string, reas
 	}
 
 	return normalizeCodexModel(modelID), reasoningEffort, true
-}
-
-func openAIReasoningEffortToClaudeOutputEffort(effort string) string {
-	switch strings.TrimSpace(effort) {
-	case "low", "medium", "high":
-		return effort
-	case "xhigh":
-		return "max"
-	default:
-		return ""
-	}
 }

@@ -503,6 +503,12 @@ export interface OpenAIMessagesDispatchModelConfig {
   exact_model_mappings?: Record<string, string>
 }
 
+export interface OpenAIRequestOverrides {
+  service_tier?: string
+  reasoning_effort?: string
+  text_verbosity?: string
+}
+
 export interface Group {
   id: number
   name: string
@@ -572,6 +578,7 @@ export interface AdminGroup extends Group {
   default_mapped_model?: string
   messages_dispatch_model_config?: OpenAIMessagesDispatchModelConfig
   models_list_config?: ModelsListConfig
+  openai_request_overrides?: OpenAIRequestOverrides
 
   // 分组排序
   sort_order: number
@@ -685,6 +692,7 @@ export interface CreateGroupRequest {
   rpm_limit?: number
   require_oauth_only?: boolean
   require_privacy_set?: boolean
+  openai_request_overrides?: OpenAIRequestOverrides
   // 从指定分组复制账号
   copy_accounts_from_group_ids?: number[]
 }
@@ -733,6 +741,7 @@ export interface UpdateGroupRequest {
   rpm_limit?: number
   require_oauth_only?: boolean
   require_privacy_set?: boolean
+  openai_request_overrides?: OpenAIRequestOverrides
   copy_accounts_from_group_ids?: number[]
 }
 
@@ -1258,6 +1267,7 @@ export interface AdminDataAccount {
   type: AccountType
   credentials: Record<string, unknown>
   extra?: Record<string, unknown>
+  group_name?: string
   proxy_key?: string | null
   concurrency: number
   priority: number

@@ -89,6 +89,22 @@ func (s *OpenAIGatewayService) forwardOpenAIPassthrough(
 	if policyModel == "" {
 		policyModel = reqModel
 	}
+	apiKey := getAPIKeyFromContext(c)
+	var overrideErr error
+	if body, _, overrideErr = applyOpenAIRequestOverridesToBody(body, groupOpenAIRequestOverrides(apiKeyGroup(apiKey)), policyModel); overrideErr != nil {
+		return nil, overrideErr
+	}
+	if account.IsOpenAIOAuth() && isOpenAIResponsesCompactPath(c) {
+		normalizedBody, normalized, normalizeErr := normalizeOpenAICodexCompactReasoningEffort(body, policyModel)
+		if normalizeErr != nil {
+			return nil, normalizeErr
+		}
+		if normalized {
+			body = normalizedBody
+		}
+	}
+	reasoningEffort = extractOpenAIReasoningEffortFromBody(body, policyModel)
+
 	updatedBody, policyErr := s.applyOpenAIFastPolicyToBody(ctx, account, policyModel, body)
 	if policyErr != nil {
 		var blocked *OpenAIFastBlockedError
@@ -99,7 +115,6 @@ func (s *OpenAIGatewayService) forwardOpenAIPassthrough(
 	}
 	body = updatedBody
 
-	apiKey := getAPIKeyFromContext(c)
 	if IsImageGenerationIntent(openAIResponsesEndpoint, reqModel, body) && !GroupAllowsImageGeneration(apiKeyGroup(apiKey)) {
 		MarkOpsClientBusinessLimited(c, OpsClientBusinessLimitedReasonLocalFeatureGate)
 		c.JSON(http.StatusForbidden, gin.H{
