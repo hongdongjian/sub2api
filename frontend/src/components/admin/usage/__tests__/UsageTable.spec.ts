@@ -105,6 +105,7 @@ const DataTableStub = {
       <div v-for="row in data" :key="row.request_id" :data-request-id="row.request_id">
         <slot name="cell-model" :row="row" :value="row.model" />
         <slot name="cell-reasoning_effort" :row="row" :value="row.reasoning_effort" />
+        <slot name="cell-service_tier" :row="row" :value="row.service_tier" />
         <slot name="cell-billing_mode" :row="row" />
         <slot name="cell-tokens" :row="row" />
         <slot name="cell-latency" :row="row" />
@@ -380,6 +381,33 @@ describe('admin UsageTable tooltip', () => {
     const amounts = wrapper.get('.fixed').findAll('span').map(span => span.text()).filter(text => text.startsWith('$'))
     expect(amounts).toEqual(['$0.00000000', '$0.00000000', '$0.00000000', '$0.00000000'])
     wrapper.unmount()
+  })
+
+  it('shows service tier in an independent table column', () => {
+    const wrapper = mount(UsageTable, {
+      props: {
+        data: [{
+          ...baseImageRow,
+          request_id: 'req-admin-service-tier',
+          model: 'gpt-5.6-sol',
+          service_tier: 'ultrafast',
+        }],
+        loading: false,
+        columns: [],
+      },
+      global: {
+        stubs: {
+          DataTable: DataTableStub,
+          EmptyState: true,
+          Icon: true,
+          Teleport: true,
+        },
+      },
+    })
+
+    const cell = wrapper.get('[data-testid="service-tier-cell"]')
+    expect(cell.text()).toBe('Ultrafast')
+    expect(cell.classes()).toContain('bg-violet-100')
   })
 
   it('shows requested and upstream models separately for admin rows', () => {
